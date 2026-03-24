@@ -1,1 +1,383 @@
-<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Name Pairing App</title>\n</head>\n<body>\n    <h1>Name Pairing Application</h1>\n    <form id="nameForm">\n        <input type="text" id="nameInput" placeholder="Enter a name" required/>\n        <button type="button" id="addName">Add Name</button>\n    </form>\n    <h2>Entered Names:</h2>\n    <ul id="nameList"></ul>\n    <button id="shufflePairs">Shuffle and Create Pairs</button>\n    <h2>Generated Pairs:</h2>\n    <ul id="pairList"></ul>\n    <script>\n        const nameForm = document.getElementById('nameForm');\n        const nameInput = document.getElementById('nameInput');\n        const addNameBtn = document.getElementById('addName');\n        const nameList = document.getElementById('nameList');\n        const shufflePairsBtn = document.getElementById('shufflePairs');\n        const pairList = document.getElementById('pairList');\n        let names = [];\n\n        addNameBtn.addEventListener('click', () => {\n            const name = nameInput.value.trim();\n            if (name && !names.includes(name)) {\n                names.push(name);\n                const li = document.createElement('li');\n                li.textContent = name;\n                nameList.appendChild(li);\n                nameInput.value = '';\n            } else {\n                alert('Please enter a unique name.');\n            }\n        });\n\n        shufflePairsBtn.addEventListener('click', () => {\n            if (names.length < 4) {\n                alert('Please enter at least 4 names.');\n                return;\n            }\n            const shuffled = names.sort(() => 0.5 - Math.random());\n            pairList.innerHTML = ''; // Clear previous pairs\n            for (let i = 0; i < shuffled.length; i += 2) {\n                if (i + 1 < shuffled.length) {\n                    const li = document.createElement('li');\n                    li.textContent = shuffled[i] + ' & ' + shuffled[i + 1];\n                    pairList.appendChild(li);\n                }\n            }\n        });\n    <\/script>\n</body>\n</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PairUp — Random Pair Maker</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f4efe6;
+  --ink: #1c1c2e;
+  --white: #ffffff;
+  --red: #e63946;
+  --blue: #1d6fc4;
+  --green: #27ae60;
+  --muted: #a09890;
+  --border: #ddd6cc;
+  --dot: #c5bbaf;
+}
+
+body {
+  background: var(--bg);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  overflow-x: hidden;
+}
+
+/* dot pattern */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: radial-gradient(circle, var(--dot) 1.2px, transparent 1.2px);
+  background-size: 26px 26px;
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wrap {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 500px;
+}
+
+/* ── HEADER ── */
+.hdr { text-align: center; margin-bottom: 2rem; }
+.hdr .sub {
+  font-size: .65rem; font-weight: 700;
+  letter-spacing: .18em; text-transform: uppercase;
+  color: var(--red); margin-bottom: .3rem;
+}
+.hdr h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(3.8rem, 13vw, 6rem);
+  color: var(--ink); line-height: .9; letter-spacing: 2px;
+}
+.hdr h1 em { font-style: normal; color: var(--red); }
+.hdr p { margin-top: .65rem; font-size: .82rem; color: var(--muted); }
+
+/* ── CARD ── */
+.card {
+  background: var(--white);
+  border-radius: 22px;
+  padding: 1.8rem;
+  box-shadow: 0 6px 36px rgba(28,28,46,.1), 0 1px 0 var(--border);
+  margin-bottom: 1.1rem;
+}
+
+.clabel {
+  font-size: .62rem; font-weight: 700; letter-spacing: .15em;
+  text-transform: uppercase; color: var(--muted);
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.badge {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 30px; padding: 2px 12px;
+  font-size: .65rem; font-weight: 700; color: var(--ink);
+  transition: all .25s;
+}
+.badge.ok { background: #e6f9ef; border-color: var(--green); color: var(--green); }
+
+/* grid of inputs */
+.igrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .6rem;
+}
+
+.irow { position: relative; }
+
+.irow input {
+  width: 100%;
+  padding: .72rem .85rem .72rem 2.1rem;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .88rem; font-weight: 500;
+  color: var(--ink); outline: none;
+  transition: border-color .2s, background .2s, box-shadow .2s;
+  caret-color: var(--red);
+}
+.irow input::placeholder { color: #c0b4a8; }
+.irow input:focus {
+  border-color: var(--red); background: #fff;
+  box-shadow: 0 0 0 3px rgba(230,57,70,.1);
+}
+.irow input.filled { border-color: #9dd4b5; background: #f4fbf7; }
+.irow input.opt { border-style: dashed; }
+.irow input.opt.filled { border-style: solid; }
+
+.inum {
+  position: absolute; left: 10px; top: 50%;
+  transform: translateY(-50%);
+  font-size: .65rem; font-weight: 700; color: var(--muted);
+  pointer-events: none;
+}
+.irow input:focus ~ .inum { color: var(--red); }
+
+/* ── BUTTON ── */
+.btn-main {
+  margin-top: 1.3rem; width: 100%;
+  padding: 1rem;
+  background: var(--ink); color: #fff; border: none;
+  border-radius: 13px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.45rem; letter-spacing: 3px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: .55rem;
+  transition: background .2s, transform .15s, box-shadow .2s;
+  box-shadow: 0 4px 22px rgba(28,28,46,.22);
+}
+.btn-main:hover:not(:disabled) {
+  background: var(--red);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(230,57,70,.38);
+}
+.btn-main:active:not(:disabled) { transform: translateY(0); }
+.btn-main:disabled { background: #c8c0b8; cursor: not-allowed; box-shadow: none; }
+.dice { font-size: 1.2rem; transition: transform .35s; }
+.btn-main:hover .dice { transform: rotate(180deg); }
+
+.hint { text-align: center; font-size: .72rem; color: var(--muted); margin-top: .5rem; min-height: 1.2em; }
+
+/* ── RESULTS ── */
+.results { display: none; }
+.results.on {
+  display: block;
+  animation: riseUp .5s cubic-bezier(.22,1,.36,1);
+}
+@keyframes riseUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.rtitle {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem; letter-spacing: 4px;
+  color: var(--muted); text-align: center;
+  margin-bottom: 1rem;
+}
+
+/* pair blocks side by side */
+.pair-row {
+  display: grid;
+  grid-template-columns: 1fr 52px 1fr;
+  align-items: center;
+  gap: 0;
+  margin-bottom: .9rem;
+}
+
+.pblock {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 1.2rem .9rem 1.1rem;
+  box-shadow: 0 2px 18px rgba(28,28,46,.09);
+  text-align: center;
+}
+.pblock.r { border-top: 4px solid var(--red); }
+.pblock.b { border-top: 4px solid var(--blue); }
+
+.ptag {
+  display: inline-block;
+  font-size: .58rem; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase;
+  border-radius: 20px; padding: 2px 10px;
+  margin-bottom: .8rem;
+}
+.pblock.r .ptag { background: rgba(230,57,70,.1); color: var(--red); }
+.pblock.b .ptag { background: rgba(29,111,196,.1); color: var(--blue); }
+
+.pnames { display: flex; flex-direction: column; gap: .45rem; }
+
+.pname {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.35rem; letter-spacing: 1px;
+  color: var(--ink);
+  background: var(--bg); border-radius: 8px;
+  padding: .32rem .4rem;
+  animation: pop .4s cubic-bezier(.34,1.56,.64,1) both;
+}
+.pname:nth-child(2) { animation-delay: .07s; }
+@keyframes pop {
+  from { opacity:0; transform: scale(.78); }
+  to   { opacity:1; transform: scale(1); }
+}
+
+/* vs circle */
+.vs-wrap { display: flex; align-items: center; justify-content: center; }
+.vs {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--ink); color: #fff;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem; letter-spacing: 1px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 12px rgba(28,28,46,.2);
+  flex-shrink: 0;
+}
+
+/* remaining */
+.rem-card {
+  background: var(--white);
+  border-radius: 13px; padding: .9rem 1.1rem;
+  box-shadow: 0 2px 14px rgba(28,28,46,.08);
+  display: flex; align-items: center; flex-wrap: wrap; gap: .7rem;
+  margin-bottom: .9rem;
+}
+.rem-label {
+  font-size: .6rem; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--muted); white-space: nowrap;
+}
+.rem-tags { display: flex; flex-wrap: wrap; gap: .45rem; }
+.rtag {
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: 20px; padding: 3px 14px;
+  font-size: .83rem; font-weight: 600; color: var(--ink);
+}
+
+/* again btn */
+.btn-again {
+  width: 100%; padding: .85rem;
+  background: transparent; color: var(--ink);
+  border: 2px solid var(--ink); border-radius: 13px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.2rem; letter-spacing: 2px;
+  cursor: pointer;
+  transition: background .2s, color .2s, transform .15s;
+}
+.btn-again:hover { background: var(--ink); color: #fff; transform: translateY(-1px); }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="hdr">
+    <div class="sub">Random Pairing Tool</div>
+    <h1>PAIR<em>UP</em></h1>
+    <p>Enter 4–6 names · Instantly get 2 shuffled pairs</p>
+  </div>
+
+  <div class="card">
+    <div class="clabel">
+      <span>Player Names</span>
+      <span class="badge" id="badge">0 entered</span>
+    </div>
+    <div class="igrid" id="igrid"></div>
+    <button class="btn-main" id="btnShuffle" disabled>
+      <span class="dice">🎲</span> SHUFFLE &amp; PAIR
+    </button>
+    <div class="hint" id="hint">Enter at least 4 names to begin</div>
+  </div>
+
+  <div class="results" id="results">
+    <div class="rtitle">— YOUR PAIRS —</div>
+    <div class="pair-row" id="pairRow"></div>
+    <div id="remWrap"></div>
+    <button class="btn-again" id="btnAgain">↻ SHUFFLE AGAIN</button>
+  </div>
+
+</div>
+
+<script>
+const inputs = [];
+const grid = document.getElementById('igrid');
+
+for (let i = 0; i < 6; i++) {
+  const row = document.createElement('div');
+  row.className = 'irow';
+  const inp = document.createElement('input');
+  inp.type = 'text'; inp.maxLength = 18;
+  inp.placeholder = i < 4 ? `Name ${i+1}` : `Name ${i+1} (opt.)`;
+  if (i >= 4) inp.classList.add('opt');
+  const num = document.createElement('span');
+  num.className = 'inum'; num.textContent = i + 1;
+  row.appendChild(inp); row.appendChild(num);
+  grid.appendChild(row);
+  inputs.push(inp);
+  inp.addEventListener('input', sync);
+}
+
+function getNames() { return inputs.map(i => i.value.trim()).filter(Boolean); }
+
+function sync() {
+  const names = getNames(), n = names.length;
+  const badge = document.getElementById('badge');
+  const btn   = document.getElementById('btnShuffle');
+  const hint  = document.getElementById('hint');
+
+  badge.textContent = n === 1 ? '1 entered' : `${n} entered`;
+  badge.className = 'badge' + (n >= 4 ? ' ok' : '');
+  btn.disabled = n < 4;
+  hint.textContent = n < 4
+    ? `Enter ${4-n} more name${4-n>1?'s':''} to start`
+    : `✓ ${n} names ready`;
+
+  inputs.forEach(i => i.classList.toggle('filled', i.value.trim().length > 0));
+  document.getElementById('results').classList.remove('on');
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function doPair() {
+  const names = getNames();
+  if (names.length < 4) return;
+  const s = shuffle(names);
+  const p1 = [s[0], s[1]], p2 = [s[2], s[3]], rest = s.slice(4);
+
+  document.getElementById('pairRow').innerHTML = `
+    <div class="pblock r">
+      <div class="ptag">Pair 1</div>
+      <div class="pnames">
+        <div class="pname">${esc(p1[0])}</div>
+        <div class="pname">${esc(p1[1])}</div>
+      </div>
+    </div>
+    <div class="vs-wrap"><div class="vs">VS</div></div>
+    <div class="pblock b">
+      <div class="ptag">Pair 2</div>
+      <div class="pnames">
+        <div class="pname">${esc(p2[0])}</div>
+        <div class="pname">${esc(p2[1])}</div>
+      </div>
+    </div>
+  `;
+
+  const rw = document.getElementById('remWrap');
+  rw.innerHTML = rest.length ? `
+    <div class="rem-card">
+      <span class="rem-label">Sitting out</span>
+      <div class="rem-tags">${rest.map(n=>`<span class="rtag">${esc(n)}</span>`).join('')}</div>
+    </div>` : '';
+
+  const r = document.getElementById('results');
+  r.classList.remove('on');
+  void r.offsetWidth;
+  r.classList.add('on');
+}
+
+document.getElementById('btnShuffle').addEventListener('click', doPair);
+document.getElementById('btnAgain').addEventListener('click', doPair);
+</script>
+</body>
+</html>
